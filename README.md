@@ -35,6 +35,52 @@ This combination of OMOP CDM and Synthea data provides a robust foundation for d
 - Process temporal relationships
 - Maintain data privacy (using synthetic data)
 
+## Database Setup
+
+### Option 1: Use Existing Database (Current Setup)
+The current implementation uses a local PostgreSQL database with OMOP CDM schema and Synthea data. To use this setup:
+
+1. Contact the repository owner for:
+   - Database backup file
+   - Database credentials
+   - Connection details
+
+2. Set up your `.env` file with the provided credentials:
+   ```
+   DATABASE_URI=postgresql://username:password@localhost:5432/omop_cdm
+   ```
+
+### Option 2: Set Up New Database
+To set up your own database:
+
+1. Install PostgreSQL
+2. Create a new database
+3. Set up OMOP CDM schema:
+   ```bash
+   # Clone OHDSI/CommonDataModel
+   git clone https://github.com/OHDSI/CommonDataModel.git
+   
+   # Run the PostgreSQL scripts to create the schema
+   psql -d your_database_name -f CommonDataModel/PostgreSQL/OMOP CDM postgresql ddl.txt
+   ```
+
+4. Generate and load Synthea data:
+   ```bash
+   # Clone Synthea
+   git clone https://github.com/synthetichealth/synthea.git
+   
+   # Generate synthetic data
+   ./run_synthea -p 1000  # Generate 1000 patients
+   
+   # Convert to OMOP CDM format using Synthea-to-OMOP
+   # (Follow instructions at https://github.com/OHDSI/ETL-Synthea)
+   ```
+
+5. Set up your `.env` file:
+   ```
+   DATABASE_URI=postgresql://your_username:your_password@localhost:5432/your_database_name
+   ```
+
 ## Current Architecture
 
 The agent chain consists of five main components:
@@ -122,6 +168,28 @@ The agent chain consists of five main components:
   - Outlier detection
   - Data quality metrics
   - Automated data cleaning
+
+### 7. Data Profiling and ETL Tools
+- Integrate [WhiteRabbit-In-A-Hat](https://github.com/OHDSI/WhiteRabbit) for:
+  - Source data profiling
+  - Data quality assessment
+  - Field mapping assistance
+  - Data type validation
+  - Value distribution analysis
+
+- Implement [Jackalope](https://github.com/OHDSI/Jackalope) for:
+  - Automated ETL process generation
+  - Source-to-target mapping
+  - Data transformation rules
+  - ETL workflow automation
+  - Data quality monitoring
+
+These tools will enhance the data pipeline by:
+- Providing better data quality insights
+- Automating ETL processes
+- Ensuring data consistency
+- Supporting data governance
+- Facilitating data mapping
 
 ## Getting Started
 
