@@ -185,6 +185,7 @@ The agent chain consists of five main components:
   - Data quality monitoring
 
 These tools will enhance the data pipeline by:
+- Enabling mapping of new data sources into OMOP-CDM format
 - Providing better data quality insights
 - Automating ETL processes
 - Ensuring data consistency
