@@ -117,7 +117,9 @@ The agent chain consists of five main components:
 
 - **Database Access**: Direct SQL queries to OMOP CDM tables using SQLAlchemy
 - **Data Processing**: Pandas for query execution and data manipulation
-- **Web Interface**: Streamlit for interactive querying
+- **Web Interface**: 
+  - Main Streamlit app for natural language querying
+  - Secondary Streamlit dashboard for event rate analysis (ER visits and hospitalizations)
 - **Natural Language Processing**: Custom regex-based parsing
 - **Agent Framework**: LangChain for agent orchestration
 
@@ -199,11 +201,20 @@ These tools will enhance the data pipeline by:
    ```bash
    pip install -r requirements.txt
    ```
-3. Set up your `.env` file with database credentials
-4. Run the Streamlit app:
+
+3. Run the main Streamlit app for natural language querying:
    ```bash
-   streamlit run app.py
+   streamlit run app.py --server.port 8501 --server.address 127.0.0.1
    ```
+
+4. Run the rates dashboard app in a separate terminal:
+   ```bash
+   streamlit run rates/streamlit_app.py --server.port 8502 --server.address 127.0.0.1
+   ```
+
+5. Access the apps in your browser:
+   - Main app: http://127.0.0.1:8501
+   - Rates dashboard: http://127.0.0.1:8502
 
 ## Testing
 
