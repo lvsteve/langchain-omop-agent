@@ -1,0 +1,19 @@
+# Development dependencies
+-r requirements.txt  # Include core dependencies
+
+# Testing
+pytest==8.0.0
+pytest-cov==4.1.0  # For test coverage reporting
+
+# Code Quality
+black==24.2.0  # Code formatting
+flake8==7.0.0  # Linting
+mypy==1.8.0   # Type checking
+isort==5.13.2  # Import sorting
+
+# Git Hooks
+pre-commit==4.2.0
+
+# Documentation
+sphinx==7.2.6  # Documentation generation
+sphinx-rtd-theme==2.0.0  # ReadTheDocs theme 
