@@ -1,0 +1,7 @@
+langchain
+openai
+sqlalchemy
+psycopg2-binary
+pandas
+python-dotenv
+streamlit
