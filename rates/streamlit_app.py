@@ -72,28 +72,53 @@ def format_table(df):
     
     return df, column_config
 
-st.header("ER Event Table")
-er_df = calculate_event_table('er')
-er_df.rename(columns={
-    'year': 'Year',
-    'total_members': 'Total Members',
-    'members_with_event': 'Members with ER Event',
-    'total_events': 'Total ER Events',
-    'member_months': 'Member Months',
-    'rate_per_1000': 'Rate per 1000 Member Months'
-}, inplace=True)
-df, config = format_table(er_df)
-st.dataframe(df, column_config=config, hide_index=True)
+# Create two columns for the buttons
+col1, col2 = st.columns(2)
 
-st.header("Hospitalization Event Table")
-hosp_df = calculate_event_table('hospital')
-hosp_df.rename(columns={
-    'year': 'Year',
-    'total_members': 'Total Members',
-    'members_with_event': 'Members with Hospital Event',
-    'total_events': 'Total Hospital Events',
-    'member_months': 'Member Months',
-    'rate_per_1000': 'Rate per 1000 Member Months'
-}, inplace=True)
-df, config = format_table(hosp_df)
-st.dataframe(df, column_config=config, hide_index=True) 
+# Add buttons in the columns
+with col1:
+    er_button = st.button("Show ER Visit Rates", type="primary")
+with col2:
+    hosp_button = st.button("Show Hospitalization Rates", type="primary")
+
+# Initialize session state for tracking which table to show
+if 'show_table' not in st.session_state:
+    st.session_state.show_table = None
+
+# Update session state based on button clicks
+if er_button:
+    st.session_state.show_table = 'er'
+if hosp_button:
+    st.session_state.show_table = 'hospital'
+
+# Display the selected table
+if st.session_state.show_table == 'er':
+    st.header("ER Visit Rates")
+    er_df = calculate_event_table('er')
+    er_df.rename(columns={
+        'year': 'Year',
+        'total_members': 'Total Members',
+        'members_with_event': 'Members with ER Event',
+        'total_events': 'Total ER Events',
+        'member_months': 'Member Months',
+        'rate_per_1000': 'Rate per 1000 Member Months'
+    }, inplace=True)
+    df, config = format_table(er_df)
+    st.dataframe(df, column_config=config, hide_index=True)
+
+elif st.session_state.show_table == 'hospital':
+    st.header("Hospitalization Rates")
+    hosp_df = calculate_event_table('hospital')
+    hosp_df.rename(columns={
+        'year': 'Year',
+        'total_members': 'Total Members',
+        'members_with_event': 'Members with Hospital Event',
+        'total_events': 'Total Hospital Events',
+        'member_months': 'Member Months',
+        'rate_per_1000': 'Rate per 1000 Member Months'
+    }, inplace=True)
+    df, config = format_table(hosp_df)
+    st.dataframe(df, column_config=config, hide_index=True)
+
+else:
+    st.info("👆 Select a table to display using the buttons above") 
