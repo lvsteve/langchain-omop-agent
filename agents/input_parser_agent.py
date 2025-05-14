@@ -13,7 +13,7 @@ def parse_question(question: str):
     Supported features:
       - Age filter: 'over age N'
       - Condition(s): after 'with', 'having', or 'diagnosed with', split on 'and'/'or'
-      - Visit type: 'ER', 'inpatient', 'hospital'
+      - Visit type: 'ER', 'inpatient', 'hospital', 'hospitalizations'
       - Year: 'in 2023', etc.
 
     Avoid complex or multi-part questions for now.
@@ -39,10 +39,10 @@ def parse_question(question: str):
     if match:
         result["year"] = int(match.group(1))
 
-    # Extract visit type
-    if 'er' in question:
+    # Extract visit type using whole word matching
+    if re.search(r'\ber\b', question):
         result["visit_type"] = "ER"
-    elif 'inpatient' in question or 'hospital' in question:
+    elif re.search(r'\binpatient\b', question) or re.search(r'\bhospital\b', question) or re.search(r'\bhospitalizations\b', question):
         result["visit_type"] = "Inpatient"
 
     # Extract conditions

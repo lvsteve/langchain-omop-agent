@@ -49,7 +49,8 @@ if __name__ == "__main__":
     test_cases = [
         "Find patients over age 65 with diabetes and hypertension",
         "Show me patients with type 1 diabetes who visited the ER in 2023",
-        "What is the total number of inpatient visits for patients with essential hypertension?"
+        "What is the total number of inpatient visits for patients with essential hypertension?",
+        "Find patients with hospitalizations since 2020"
     ]
     
     for i, question in enumerate(test_cases, 1):
