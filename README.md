@@ -37,48 +37,119 @@ This combination of OMOP CDM and Synthea data provides a robust foundation for d
 
 ## Database Setup
 
-### Option 1: Use Existing Database (Current Setup)
-The current implementation uses a local PostgreSQL database with OMOP CDM schema and Synthea data. To use this setup:
-
-1. Contact the repository owner for:
-   - Database backup file
-   - Database credentials
-   - Connection details
-
-2. Set up your `.env` file with the provided credentials:
-   ```
-   DATABASE_URI=postgresql://username:password@localhost:5432/omop_cdm
+### Prerequisites
+1. Install R and required packages:
+   ```R
+   install.packages(c("devtools", "DatabaseConnector", "SqlRender"))
+   devtools::install_github("OHDSI/ETL-Synthea")
    ```
 
-### Option 2: Set Up New Database
-To set up your own database:
-
-1. Install PostgreSQL
-2. Create a new database
-3. Set up OMOP CDM schema:
+2. Install PostgreSQL and create a new database:
    ```bash
-   # Clone OHDSI/CommonDataModel
-   git clone https://github.com/OHDSI/CommonDataModel.git
-   
-   # Run the PostgreSQL scripts to create the schema
-   psql -d your_database_name -f CommonDataModel/PostgreSQL/OMOP CDM postgresql ddl.txt
+   createdb omop_cdm
    ```
 
-4. Generate and load Synthea data:
+### Step 1: Set Up Synthea Schema
+1. Clone Synthea:
    ```bash
-   # Clone Synthea
    git clone https://github.com/synthetichealth/synthea.git
-   
-   # Generate synthetic data
-   ./run_synthea -p 1000  # Generate 1000 patients
-   
-   # Convert to OMOP CDM format using Synthea-to-OMOP
-   # (Follow instructions at https://github.com/OHDSI/ETL-Synthea)
+   cd synthea
    ```
 
-5. Set up your `.env` file:
+2. Generate synthetic data:
+   ```bash
+   ./run_synthea -p 1000  # Generate 1000 patients
    ```
-   DATABASE_URI=postgresql://your_username:your_password@localhost:5432/your_database_name
+
+3. Create Synthea schema in PostgreSQL:
+   ```R
+   library(ETLSyntheaBuilder)
+   createSyntheaTables(connectionDetails)
+   ```
+
+### Step 2: Set Up OMOP CDM Schema
+1. Clone OHDSI Common Data Model:
+   ```bash
+   git clone https://github.com/OHDSI/CommonDataModel.git
+   ```
+
+2. Create OMOP CDM tables:
+   ```bash
+   psql -d omop_cdm -f CommonDataModel/PostgreSQL/OMOP\ CDM\ postgresql\ ddl.txt
+   ```
+
+### Step 3: Load Vocabulary
+1. Download vocabulary files from [Athena](https://athena.ohdsi.org/):
+   - CONCEPT.csv
+   - CONCEPT_RELATIONSHIP.csv
+   - CONCEPT_ANCESTOR.csv
+   - CONCEPT_SYNONYM.csv
+   - VOCABULARY.csv
+   - CONCEPT_CLASS.csv
+   - DOMAIN.csv
+   - RELATIONSHIP.csv
+
+2. Load vocabulary into database:
+   ```R
+   library(ETLSyntheaBuilder)
+   loadVocabulary(connectionDetails, vocabPath = "path/to/vocabulary/files")
+   ```
+
+### Step 4: Load Synthea Data into OMOP CDM
+1. Convert Synthea data to OMOP CDM format:
+   ```R
+   library(ETLSyntheaBuilder)
+   etlSynthea(connectionDetails,
+             syntheaSchema = "synthea",
+             cdmSchema = "cdm",
+             syntheaVersion = "2.7.0",
+             syntheaFileLoc = "path/to/synthea/output/csv")
+   ```
+
+### Step 5: AWS Setup
+1. Create an AWS RDS PostgreSQL instance:
+   - Choose PostgreSQL as the engine
+   - Select appropriate instance size (recommended: db.t3.large or larger)
+   - Enable Multi-AZ for production environments
+   - Configure security groups to allow access from your application
+
+2. Configure security groups and network access:
+   - Create a VPC if you don't have one
+   - Set up security groups to allow PostgreSQL traffic (port 5432)
+   - Configure network ACLs for additional security
+   - Set up IAM roles for database access
+
+3. Migrate data to AWS:
+   ```bash
+   pg_dump -h localhost -U username -d omop_cdm | psql -h your-aws-endpoint -U username -d omop_cdm
+   ```
+
+4. Set up your `.env` file with AWS credentials:
+   ```
+   DATABASE_URI=postgresql://username:password@your-aws-endpoint:5432/omop_cdm
+   ```
+
+5. Deploy the application to AWS:
+   - Set up an EC2 instance or use AWS Elastic Beanstalk
+   - Configure environment variables
+   - Set up proper security groups for the application
+   - Configure auto-scaling if needed
+
+### Step 6: Verify Setup
+1. Run test queries to verify data:
+   ```sql
+   SELECT COUNT(*) FROM cdm.person;
+   SELECT COUNT(*) FROM cdm.condition_occurrence;
+   SELECT COUNT(*) FROM cdm.visit_occurrence;
+   ```
+
+2. Run the test scripts:
+   ```bash
+   python test_diabetes.py
+   python test_hypertension.py
+   python test_diabetes_hypertension.py
+   python test_er_visits.py
+   python test_hospitalizations.py
    ```
 
 ## Current Architecture
